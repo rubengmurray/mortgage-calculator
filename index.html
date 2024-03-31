@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Mortgage Calculator</title>
+  <script src="tailwind/3.3.5.js"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+  <div class="max-w-3xl mx-auto bg-white rounded p-6 shadow-md">
+    <h1 class="text-2xl font-semibold mb-4 text-teal-700">Mortgage Calculator</h1>
+    <div id="intro">
+      <p class="text-sm text-teal-700">
+        Welcome to the mid-term mortgage overpayment calculator. Here you will be able to
+        see the effects of monthly overpayments and changes in interest rates for the duration of your mortgage. You
+        should have to hand the remaining amount of money owed on your mortgage at the time of using this tool.
+      </p>
+      <br />
+      <p class="text-sm text-teal-700">
+        If you have an existing fixed-term rate, you should add the associated duration
+        and interest rate for that term. A market interest rate should be added to illustrate what payments will look
+        like after your fixed term ends. This is currently defaulted to 6%. If you have no fixed-term, the market rate
+        will be used for all payment calculations.
+      </p>
+      <br />
+    </div>
+    <p class="text-xs text-yellow-900">
+      Disclaimer: This calculator is to be used as a guide. The author shall take no
+      responsibility for any actions taken from the data contained herein.
+    </p>
+    <br />
+    <hr />
+    <br />
+    <form id="mortgageForm">
+      <div class="mb-4" id="mortgageAmount">
+        <label for="loanAmount">Remaining Mortgage Amount:</label>
+        <input 
+          type="number" 
+          value="400000" 
+          id="loanAmount" 
+          required
+          class="form-input border border-slate-400 rounded-lg"
+        >
+      </div>
+
+      <div class="mb-4">
+        <label for="loanTermInYears">Remaining Mortgage Lifetime:</label>
+        <input type="number" value="32" id="loanTermInYears" required
+          class="form-input border border-slate-400 rounded-lg w-10">
+        <label for="loanTermInYears" class="text-teal-700">Years</label>
+        <input type="number" value="10" id="loanTermInMonths" required
+          class="form-input border border-slate-400 rounded-lg w-10 ml-1">
+        <label for="loanTermInMonths" class="text-teal-700">Months</label>
+      </div>
+
+      <div class="mb-4">
+        <label for="loanTermInYears">Remaining Fixed Term:</label>
+        <input type="number" value="2" id="remainingFixedTermYears"
+          class="form-input border border-slate-400 rounded-lg w-10">
+        <label for="remainingFixedTermYears">Years</label>
+        <input type="number" value="10" id="remainingFixedTermMonths"
+          class="form-input border border-slate-400 rounded-lg w-10 ml-1">
+        <label for="remainingFixedTermMonths">Months</label>
+        <p class="text-xs text-teal-700">Optional: if you have a fixed term, add the duration here.</p>
+      </div>
+
+      <div class="mb-4">
+        <label for="annualInterestRate">Fixed Term Interest Rate (%):</label>
+        <input type="number" value="3.74" id="annualInterestRate" step="0.01" required
+          class="form-input border border-slate-400 rounded-lg">
+      </div>
+
+      <div class="mb-4">
+        <label for="predictedRate">Market Interest Rate (%):</label>
+        <input type="number" value="6" id="predictedRate" class="form-input border border-slate-400 rounded-lg">
+        <p class="text-xs text-teal-700">What you expect to pay when your fixed-term (if applicable) ends</p>
+        <p class="text-xs text-teal-700">If you don't have a fixed-term this value will be used by default</p>
+      </div>
+
+      <hr />
+      <br />
+
+      <div class="mb-4">
+        <label for="extraMonthlyPayment">Monthly Overpayment Amount:</label>
+        <input type="number" value="200" id="extraMonthlyPayment" required
+          class="form-input border border-slate-400 rounded-lg">
+        <p class="text-xs text-teal-700">Optional: Use this number to see the effect of overpayments on your mortgage
+        </p>
+      </div>
+
+      <div class="mb-4">
+        <label for="extraPaymentStartMonth">Overpayment Starting Month:</label>
+        <input type="number" value="1" id="extraPaymentStartMonth" required
+          class="form-input border border-slate-400 rounded-lg">
+        <p class="text-xs text-teal-700">Use this field if you are starting overpayments on a certain month of your
+          mortgage term.</p>
+      </div>
+
+      <div class="mb-4">
+        <label for="paymentFrequency">Goal:</label>
+        <select id="paymentFrequency" class="form-select mt-1 border">
+          <option value="1" selected>Reduce Mortgage Lifetime</option>
+          <option value="2">Reduce Monthly Payments</option>
+        </select>
+        <p class="text-xs text-teal-700 mt-1 mb-1">Reduce Mortgage Lifetime: payments will stay the same and your
+          mortgage will be paid off earlier.</p>
+        <p class="text-xs text-teal-700 mb-1">Reduce Monthly Payments: payments will reduce but your mortgage term will
+          remain the same.</p>
+        <p class="text-xs text-teal-700 mb-1">Check your mortgage agreement to understand which is applicable to you.
+        </p>
+      </div>
+
+      <button type="button" id="calculateButton" onclick="calculateMortgage()"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full">Calculate</button>
+    </form>
+    <br />
+    <hr />
+
+    <div id="paymentValues" class="hidden bg-white rounded-md shadow-md p-4 my-4">
+      <p class="mb-2 text-m">
+        <strong class="text-gray-900">Interest You Will Pay:</strong>
+        <span id="interestPaymentValue" class="ml-2 text-teal-700 font-medium"></span>
+      </p>
+      <p class="mb-2 text-m">
+        <strong class="text-gray-900">Interest You Will Save From Overpayments:</strong>
+        <span id="interestSavedValue" class="ml-2 text-teal-700 font-medium"></span>
+      </p>
+      <p class="text-m">
+        <strong class="text-gray-900">Updated Mortgage Lifetime:</strong>
+        <span id="mortgageLifetimeValue" class="ml-2 text-teal-700 font-medium"></span>
+      </p>
+      <br />
+      <hr />
+    </div>
+
+    <div class="hidden" id="paymentScheduleElement">
+      <p class="text-xs text-teal-700 mt-1 mb-3">Debt payment + interest payment = monthly payment</p>
+      <h2 class="text-xl font-semibold mb-2">Payment Schedule:</h2>
+      <p class="text-xs text-teal-700 mb-1"><span class="bg-blue-100 text-black px-1 py-1">The row with this colour
+          indicates the first payment after your fixed-term ends</span></p>
+      <label class="flex items-center mt-3">
+        <input type="checkbox" id="showCondensedPaymentsCheckbox" checked />
+        <span class="ml-2 text-xs text-teal-900">Only show first payment, fixed-term-end, five-yearly intervals and
+          final payment</span>
+      </label>
+      <label class="flex items-center mt-3">
+        <input type="checkbox" id="showCurrencyCheckbox" checked />
+        <span class="ml-2 text-xs text-teal-900">Show currency</span>
+      </label>
+      <label class="flex items-center mt-3" id="cacheDataCheckboxDiv">
+        <input type="checkbox" id="cacheDataCheckbox" />
+        <span class="ml-2 text-xs text-teal-900">Save mortgage terms on your machine for next time.</span>
+      </label>
+      <table class="min-w-full">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Month</th>
+            <th class="px-4 py-2">Debt Payment</th>
+            <th class="px-4 py-2">Interest Payment</th>
+            <th class="px-4 py-2">Monthly Payment</th>
+            <th class="px-4 py-2">Extra Payment</th>
+            <th class="px-4 py-2">Remaining Balance</th>
+          </tr>
+        </thead>
+        <tbody id="amortizationTable">
+          <!-- Table rows will be populated using JavaScript -->
+        </tbody>
+      </table>
+    </div>
+    <hr />
+    <p class="text-xs text-yellow-900 mt-2 mb-2">Your mortgage data does not leave this page.</p>
+    <hr />
+    <p class="text-xs text-gray-500 mt-2 mb-2">Built by <a href="https://reece-daniels.vercel.app" target="_blank"
+        class="text-gray-800">Reece Daniels</a>, with the help of ChatGPT.</p>
+    <hr />
+    <span class="text-xs text-gray-500 mt-2 mb-2">This tool is open-source. You can find the code on <a href="https://github.com/rubengmurray/mortgage-calculator" target="_blank">GitHub</a>.</span>
+    
+    <script async data-id="101444932" src="//static.getclicky.com/js"></script>
+    <script src="logic.js"></script>
+    <script>
+      const inputFields = [
+        "loanAmount",
+        "annualInterestRate",
+        "loanTermInYearsMonths",
+        "loanTermInMonths",
+        "extraPaymentStartMonth",
+        "extraMonthlyPayment",
+        "remainingFixedTermYears",
+        "predictedRate",
+        "paymentFrequency",
+        "paymentScheduleElement",
+        "interestPaymentValue",
+        "interestSavedValue",
+        "mortgageLifetimeValue",
+        "paymentValues",
+        "showCondensedPaymentsCheckbox",
+        "showCurrencyCheckbox",
+        "remainingFixedTermMonths",
+        "loanTermYears",
+      ]
+      // Function to load saved terms from local storage
+      function loadSavedTerms() {
+        const localStorageItems = inputFields.map(inputField => localStorage.getItem(inputField));
+
+        localStorageItems.forEach((value, index) => {
+          if (value !== null) {
+            document.getElementById(inputFields[index]).value = value;
+          }
+        })
+      }
+
+      // Call loadSavedTerms to populate defaults from local storage
+      loadSavedTerms();
+    </script>
+    <script>
+      /**
+       * Hate the mutation in here but it does the job. Co-authored with ChatGPT for speed.
+       * https://chat.openai.com/share/8a78a751-1919-4e65-8928-fc1ed7616e97
+       * I wanted a mortgage calculator that outputted data in-line with my current mortgage, which this does.
+       */
+
+      let hasScrolled = false;
+
+      // Scroll to the payment schedule when the calculate button is clicked
+      document.getElementById('calculateButton').addEventListener('click', function () {
+        const target = document.getElementById('extraMonthlyPayment');
+
+        if (hasScrolled === true) {
+          return
+        }
+
+        window.scrollTo({
+          top: target.offsetTop - 15,
+          behavior: 'smooth'
+        });
+
+        hasScrolled = true;
+      });
+
+      // Save data to local storage if the user chooses to save typing it in next time
+      document.getElementById('cacheDataCheckbox').addEventListener('click', function () {
+        const cacheDataCheckbox = document.getElementById("cacheDataCheckbox").checked;
+        if (cacheDataCheckbox === true) {
+          saveTermsToLocalStorage();
+          document.getElementById("cacheDataCheckboxDiv").className = 'hidden'
+        }
+      });
+
+      function saveTermsToLocalStorage() {
+        inputFields.forEach((inputField, index) => {
+          const currentValue = document.getElementById(inputField)?.value;
+
+          if (!currentValue) {
+            return;
+          }
+
+          localStorage.setItem(inputField, currentValue);
+        })
+      }
+
+      // Re-calculate mortgage for display when the checkbox is selected
+      document.getElementById('showCondensedPaymentsCheckbox').addEventListener('change', function () {
+        calculateMortgage();
+      });
+
+      document.getElementById('showCurrencyCheckbox').addEventListener('change', function () {
+        calculateMortgage();
+      });
+
+      // Main logic handler
+      function calculateMortgage() {
+        const debt = parseFloat(document.getElementById("loanAmount").value);
+        const annualInterestRate = parseFloat(document.getElementById("annualInterestRate").value);
+        const loanTermInYearsMonths = parseFloat(document.getElementById("loanTermInYears").value) * 12;
+        const loanTermInMonths = parseFloat(document.getElementById("loanTermInMonths").value);
+        const extraPaymentStartMonth = parseInt(document.getElementById("extraPaymentStartMonth").value);
+        const extraMonthlyPayment = parseFloat(document.getElementById("extraMonthlyPayment").value);
+        const remainingMortageTermInMonths = parseFloat(document.getElementById("remainingFixedTermYears").value) * 12;
+        const remainingMortageTermMonths = parseFloat(document.getElementById("remainingFixedTermMonths").value);
+        const nominalMortgageRate = parseFloat(document.getElementById("predictedRate").value);
+        const paymentFrequency = document.getElementById("paymentFrequency").value;
+        const paymentScheduleElement = document.getElementById("paymentScheduleElement");
+        const interestPaymentSpan = document.getElementById("interestPaymentValue");
+        const interestSavedSpan = document.getElementById("interestSavedValue")
+        const mortgageLifetimeSpan = document.getElementById("mortgageLifetimeValue");
+        const paymentValues = document.getElementById("paymentValues");
+        const introDiv = document.getElementById("intro");
+        const showCondensedPaymentsCheckbox = document.getElementById("showCondensedPaymentsCheckbox").checked;
+        const showCurrencyCheckbox = document.getElementById("showCurrencyCheckbox").checked;
+
+        // Calculate all the payment term schedules
+        const { noOverpaymentsSchedule, reducePaymentSchedule, reduceLifetimeSchedule } = calculateMortgageAmortization(
+          debt,
+          annualInterestRate,
+          loanTermInMonths + loanTermInYearsMonths,
+          extraPaymentStartMonth,
+          extraMonthlyPayment,
+          remainingMortageTermInMonths + remainingMortageTermMonths,
+          nominalMortgageRate
+        );
+
+        paymentScheduleElement.className = "mt-6";
+        paymentValues.className = "mt-6"
+
+        const renderPaymentTable = (paymentScheduleData) => {
+          const paymentTable = document.getElementById("amortizationTable");
+          paymentTable.innerHTML = ""; // Clear previous content
+
+          // Populate the table with rows (crude, but it does the job)
+          paymentScheduleData.forEach((monthlyPayment, index) => {
+            const tableRow = document.createElement("tr");
+            const totalPayment = monthlyPayment.debtPayment + monthlyPayment.interestPayment;
+            tableRow.className = index === remainingMortageTermInMonths + remainingMortageTermMonths ? "bg-blue-100" : tableRow.className;
+
+            const defaulClassString = '<td class="border px-4 py-2">';
+            const tdClassString = `${showCurrencyCheckbox ? `${defaulClassString}£` : defaulClassString}`
+
+            const renderRow = () => {
+              tableRow.innerHTML = `
+                      ${defaulClassString}${monthlyPayment.month}</td>
+                      ${tdClassString}${monthlyPayment.debtPayment.toFixed(2)}</td>
+                      ${tdClassString}${monthlyPayment.interestPayment.toFixed(2)}</td>
+                      ${tdClassString}${totalPayment.toFixed(2)}</td>
+                      ${tdClassString}${monthlyPayment.extraPayment.toFixed(2)}</td>
+                      ${tdClassString}${monthlyPayment.remainingBalance.toFixed(2)}</td>
+                  `;
+              paymentTable.appendChild(tableRow);
+            }
+
+            if (!showCondensedPaymentsCheckbox) {
+              return renderRow();
+            }
+
+            // Only show the first payment, fixed-term-end, five-yearly intervals and final payment
+            if (
+              index === 0 ||
+              index === (remainingMortageTermInMonths + remainingMortageTermMonths) - 1 ||
+              index === remainingMortageTermInMonths + remainingMortageTermMonths ||
+              index === paymentScheduleData.length - 1 ||
+              index % 60 === 0
+            ) {
+              return renderRow();
+            }
+          });
+        }
+
+        const renderPaymentStats = (paymentSchedule) => {
+          const totalsForOverpaymentSchedule = calculateStats(paymentSchedule);
+          const overpaymentScheduleTotalValues = calculateStats(noOverpaymentsSchedule);
+
+          // Set the text content of the spans to display the values
+          interestPaymentSpan.textContent = `${showCurrencyCheckbox ? '£' : ''}${totalsForOverpaymentSchedule.interestPayment.toFixed(0)}`;
+          interestSavedSpan.textContent = `${showCurrencyCheckbox ? '£' : ''}${Math.abs((overpaymentScheduleTotalValues.interestPayment - totalsForOverpaymentSchedule.interestPayment).toFixed(0))}`;
+          mortgageLifetimeSpan.textContent = (paymentSchedule.length - (paymentSchedule.length % 12)) / 12 + " years " + (paymentSchedule.length % 12) + " months";
+        }
+
+        if (paymentFrequency === "1") {
+          renderPaymentTable(reduceLifetimeSchedule)
+          renderPaymentStats(reduceLifetimeSchedule)
+          return;
+        }
+
+        renderPaymentTable(reducePaymentSchedule)
+        renderPaymentStats(reducePaymentSchedule)
+      }
+    </script>
+</body>
+
+</html>

@@ -6,5 +6,5 @@ const url = 'https://site--whatballer-be--cgbkzhc2qrj7.code.run/counter';
 fetch(url, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ message: 'Count' }),
+  body: JSON.stringify({ site: 'mortgageoverpay.com' }),
 });
